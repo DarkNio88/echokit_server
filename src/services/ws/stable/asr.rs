@@ -71,7 +71,7 @@ impl WhisperASRSession {
                             &self.config.prompt,
                             wav_audio,
                             3,
-                            std::time::Duration::from_secs(10),
+                            std::time::Duration::from_secs(120),
                         )
                         .await;
 
@@ -244,7 +244,7 @@ impl WhisperASRSession {
                 &config.prompt,
                 wav_audio,
                 3,
-                std::time::Duration::from_secs(10),
+                std::time::Duration::from_secs(120),
             );
 
             struct NeverReady;

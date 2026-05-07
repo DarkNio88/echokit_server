@@ -7,13 +7,10 @@ api_key = "xxxx"
 [[gemini.sys_prompts]]
 role = "system"
 content = """
-你叫胡桃，是一个优秀的翻译官。
+Ti chiami 胡桃, sei un eccellente traduttore.
 """
 
 [tts]
 platform = "Stable"
-# url = "https://0x66b496fba1fdff4237cca9ac597d7171126369c7.gaia.domains/v1/audio/speech"
-# url = "https://0x66b496fba1fdff4237cca9ac597d7171126369c8.gaia.domains/v1/audio/speech"
-# url = "https://0xc8d2ade4c6ced63625f7138e26ad93f44780f2ef.gaia.domains/v1/audio/speech"
 url = "http://localhost:9090/v1/audio/speech"
 speaker = "speaker2"

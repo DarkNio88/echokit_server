@@ -1,34 +1,34 @@
-addr = "0.0.0.0:8080"
+addr = "0.0.0.0:9090"
 hello_wav = "hello.wav"
 
 [asr]
 platform = "openai"
-url = "https://api.openai.com/v1/audio/transcriptions"
+url = "http://127.0.0.1:5042/v1/audio/transcriptions"
 api_key = "sk_ABCD"
-model = "gpt-4o-mini-transcribe"
-lang = "en"
+model = "openai/whisper-large-v3-turbo"
+lang = "it"
 
 [tts]
 platform = "openai"
-url = "https://api.openai.com/v1/audio/speech"
+url = "http://127.0.0.1:9091/v1/audio/speech"
 model = "gpt-4o-mini-tts"
 api_key = "sk_ABCD"
-voice = "ash"
+voice = "it+f3"
 
 [llm]
 platform = "openai_chat"
-url = "https://api.openai.com/v1/chat/completions"
+url = "https://ollama.darknio.ovh/v1/chat/completions"
 api_key = "sk_ABCD"
-model = "gpt-5-nano"
+model = "huihui_ai/glm-4.7-flash-abliterated:latest"
 history = 5
 
 [[llm.sys_prompts]]
 role = "system"
 content = """
-You are a helpful assistant. Answer truthfully and concisely. Always answer in English.
+Sei un assistente utile. Rispondi con verità e concisione. Rispondi sempre in italiano.
 
-- NEVER use bullet points
-- NEVER use tables
-- Answer in complete English sentences as if you are in a conversation.
+- NON usare mai punti elenco
+- NON usare mai tabelle
+- Rispondi in frasi complete in italiano come se stessi conversando.
 
 """

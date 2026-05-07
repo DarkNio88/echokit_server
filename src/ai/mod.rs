@@ -128,6 +128,8 @@ async fn test_groq_asr() {
 #[derive(Debug, Clone, serde::Serialize)]
 pub struct StableLlmRequest {
     stream: bool,
+    think: bool,
+    keep_alive: i32,
     #[serde(flatten)]
     extra: serde_json::Value,
     messages: Vec<llm::Content>,
@@ -139,6 +141,8 @@ pub struct StableLlmRequest {
 fn test_stable_llm_request_json() {
     let request = StableLlmRequest {
         stream: true,
+        think: false,
+        keep_alive: -1,
         extra: serde_json::json!({
             "chat_id": "test-chat-id",
         }),
@@ -487,6 +491,8 @@ pub async fn llm_stable<'p, I: IntoIterator<Item = C>, C: AsRef<llm::Content>>(
 
     let request = StableLlmRequest {
         stream: true,
+        think: false,
+        keep_alive: -1,
         messages,
         model: model.to_string(),
         extra,
@@ -926,6 +932,8 @@ pub struct ResponsesChatRequest<'a> {
     #[serde(flatten)]
     pub extra: serde_json::Value,
     pub stream: bool,
+    pub think: bool,
+    pub keep_alive: i32,
 }
 
 pub struct ResponsesSession {
@@ -1222,6 +1230,8 @@ impl ResponsesSession {
             input,
             extra,
             stream: true,
+            think: false,
+            keep_alive: -1,
         };
 
         log::debug!(
@@ -1284,6 +1294,8 @@ impl ResponsesSession {
             input: "",
             extra,
             stream: true,
+            think: false,
+            keep_alive: -1,
         };
 
         let mut req = serde_json::to_value(req)

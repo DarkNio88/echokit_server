@@ -7,29 +7,20 @@ edition = "2024"
 env_logger = "0.11.6"
 log = "0.4.25"
 clap = { version = "4.5", features = ["derive", "env"] }
-
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
 toml = "0.8"
 rmp-serde = "1"
-
 cached = { version = "0.56.0", features = ["async"] }
-
 anyhow = "1.0"
-
 axum = { version = "0.8.1", features = ["ws"] }
 axum-extra = { version = "0.10.0", features = ["typed-header"] }
-
 tokio = { version = "1", features = ["full"] }
-
 reqwest = { version = "0.12", features = ["multipart", "json", "stream"] }
-
 hound = "3.5.1"
 wav_io = "0.1.15"
 opus = "0.3.0"
-
 lip_sync = { version = "0.1", git = "https://github.com/L-jasmine/lip_sync.git" }
-
 rand = "0.9.0"
 uuid = { version = "1.14", features = [
     "v4",       # Lets you generate random UUIDs
@@ -39,10 +30,9 @@ uuid = { version = "1.14", features = [
 bytes = "1.11.0"
 aho-corasick = "1.1.3"
 lazy-regex = "3.4.2"
-
 hanconv = "0.5.0"
+minimp3 = "0.6"
 # opencc-rust = { version = "1.1.19", features = ["static-dictionaries"] }
-
 # gemini
 rmcp = { version = "0.1.5", features = [
     "base64",
@@ -59,9 +49,7 @@ futures-util = "0.3.31"
 http = "1.3.1"
 tower = { version = "0.5.2", features = ["util"] }
 tower-http = { version = "0.6.1", features = ["fs", "trace"] }
-
 chrono = "0.4.41"
-
 # vad
 silero_vad_burn = "0.1.1"
 burn = { version = "0.20", features = ["ndarray"] }

@@ -436,10 +436,60 @@ async fn elevenlabs_tts(
 }
 
 async fn send_wav(tts_resp_tx: &TTSResponseTx, wav_data: Bytes) -> anyhow::Result<()> {
-    let mut reader = wav_io::reader::Reader::from_vec(wav_data.into())
-        .map_err(|e| anyhow::anyhow!("wav_io reader error: {e}"))?;
+    let wav_vec = wav_data.to_vec();
 
-    let header = reader.read_header()?;
+    // Try to parse as WAV first. If it fails and the data looks like MP3 (ID3 or frame header),
+    // try to decode MP3 -> PCM -> produce WAV bytes and parse again.
+    let mut reader = match wav_io::reader::Reader::from_vec(wav_vec.clone()) {
+        Ok(r) => r,
+        Err(e) => {
+            log::warn!("wav_io reader error: {e}, trying mp3 decode fallback");
+            // detect MP3 by ID3 tag or MP3 frame header (0xFF 0xE0..0xFF)
+            let is_mp3 = (wav_vec.len() >= 3 && &wav_vec[0..3] == b"ID3")
+                || (wav_vec.len() >= 2 && wav_vec[0] == 0xFF && (wav_vec[1] & 0xE0) == 0xE0);
+
+            if !is_mp3 {
+                return Err(anyhow::anyhow!("wav_io reader error: {e}"));
+            }
+
+            // Decode MP3 bytes to PCM i16 and wrap as WAV
+            let wav_bytes = match decode_mp3_to_wav_bytes(&wav_vec) {
+                Ok(b) => b,
+                Err(err) => return Err(anyhow::anyhow!("mp3 -> wav decode error: {err}")),
+            };
+
+            wav_io::reader::Reader::from_vec(wav_bytes)
+                .map_err(|e2| anyhow::anyhow!("wav_io reader error after mp3 decode: {e2}"))?
+        }
+    };
+
+    // Try reading header; if read_header fails, attempt MP3 fallback as well
+    let header = match reader.read_header() {
+        Ok(h) => h,
+        Err(e) => {
+            log::warn!("wav_io read_header error: {e}, trying mp3 decode fallback");
+            let is_mp3 = (wav_vec.len() >= 3 && &wav_vec[0..3] == b"ID3")
+                || (wav_vec.len() >= 2 && wav_vec[0] == 0xFF && (wav_vec[1] & 0xE0) == 0xE0);
+
+            if !is_mp3 {
+                return Err(anyhow::anyhow!("wav_io read_header error: {e}"));
+            }
+
+            let wav_bytes = decode_mp3_to_wav_bytes(&wav_vec)
+                .map_err(|err| anyhow::anyhow!("mp3 -> wav decode error: {err}"))?;
+
+            let mut reader2 = wav_io::reader::Reader::from_vec(wav_bytes)
+                .map_err(|e2| anyhow::anyhow!("wav_io reader error after mp3 decode: {e2}"))?;
+
+            let header2 = reader2
+                .read_header()
+                .map_err(|e2| anyhow::anyhow!("wav_io read_header error after mp3 decode: {e2}"))?;
+
+            reader = reader2;
+            header2
+        }
+    };
+
     let mut samples = crate::util::get_samples_f32(&mut reader)
         .map_err(|e| anyhow::anyhow!("get_samples_f32 error: {e}"))?;
 
@@ -470,4 +520,50 @@ async fn send_wav(tts_resp_tx: &TTSResponseTx, wav_data: Bytes) -> anyhow::Resul
     }
 
     Ok(())
+}
+
+fn decode_mp3_to_wav_bytes(mp3_bytes: &[u8]) -> anyhow::Result<Vec<u8>> {
+    use std::io::Cursor;
+
+    let mut decoder = minimp3::Decoder::new(Cursor::new(mp3_bytes));
+    let mut pcm_i16: Vec<i16> = Vec::new();
+    let mut sample_rate: u32 = 16000;
+    let mut channels: u16 = 1;
+
+    loop {
+        match decoder.next_frame() {
+            Ok(frame) => {
+                sample_rate = frame.sample_rate as u32;
+                channels = frame.channels as u16;
+                pcm_i16.extend_from_slice(&frame.data);
+            }
+            Err(e) => {
+                // minimp3 returns Error::Eof on end of stream; treat as normal termination
+                let s = format!("{e:?}");
+                if s.contains("Eof") || s.contains("EOF") {
+                    break;
+                } else {
+                    return Err(anyhow::anyhow!("minimp3 decode error: {e}"));
+                }
+            }
+        }
+    }
+
+    if pcm_i16.is_empty() {
+        return Err(anyhow::anyhow!("no PCM data decoded from MP3"));
+    }
+
+    // convert i16 samples to bytes (little-endian)
+    let mut pcm_bytes = Vec::with_capacity(pcm_i16.len() * 2);
+    for s in pcm_i16 {
+        pcm_bytes.extend_from_slice(&s.to_le_bytes());
+    }
+
+    let wav_cfg = crate::util::WavConfig {
+        sample_rate,
+        channels,
+        bits_per_sample: 16,
+    };
+
+    Ok(crate::util::pcm_to_wav(&pcm_bytes, wav_cfg))
 }
