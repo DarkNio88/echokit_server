@@ -8,13 +8,18 @@ api_key = "sk_ABCD"
 model = "openai/whisper-large-v3-turbo"
 lang = "it"
 
+##[tts]
+##platform = "openai"
+##url = "http://127.0.0.1:9091/v1/audio/speech"
+##model = "gpt-4o-mini-tts"
+##api_key = "sk_ABCD"
+##voice = "mbrola:it4"
 [tts]
 platform = "openai"
-url = "http://127.0.0.1:9091/v1/audio/speech"
+url = "http://75.119.151.224:7851/v1/audio/speech"
 model = "gpt-4o-mini-tts"
 api_key = "sk_ABCD"
-voice = "it+f3"
-
+voice = "nova"
 [llm]
 platform = "openai_chat"
 url = "https://ollama.darknio.ovh/v1/chat/completions"
@@ -26,7 +31,6 @@ history = 5
 role = "system"
 content = """
 Sei un assistente utile. Rispondi con verità e concisione. Rispondi sempre in italiano.
-
 - NON usare mai punti elenco
 - NON usare mai tabelle
 - Rispondi in frasi complete in italiano come se stessi conversando.
