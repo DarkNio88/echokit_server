@@ -4,28 +4,32 @@ hello_wav = "hello.wav"
 [asr]
 platform = "openai"
 url = "http://127.0.0.1:5042/v1/audio/transcriptions"
-api_key = "sk_ABCD"
+api_key = ""
 model = "openai/whisper-large-v3-turbo"
 lang = "it"
 
-##[tts]
-##platform = "openai"
-##url = "http://127.0.0.1:9091/v1/audio/speech"
-##model = "gpt-4o-mini-tts"
-##api_key = "sk_ABCD"
-##voice = "mbrola:it4"
 [tts]
 platform = "openai"
-url = "http://75.119.151.224:7851/v1/audio/speech"
-model = "gpt-4o-mini-tts"
-api_key = "sk_ABCD"
-voice = "nova"
+url = "http://127.0.0.1:5000/v1/audio/speech"
+model = "it_IT-paola-medium"
+api_key = ""
+voice = "it_IT-paola-medium"
+
 [llm]
 platform = "openai_chat"
 url = "https://ollama.darknio.ovh/v1/chat/completions"
-api_key = "sk_ABCD"
+api_key = ""
 model = "huihui_ai/glm-4.7-flash-abliterated:latest"
-history = 5
+history = 50
+
+[llm.extra]
+enable_search = true
+
+[[llm.extra.tools]]
+type = "mcp"
+server_url = "https://mcp.deepwiki.com/mcp"
+server_label = "deepwiki"
+call_mcp_message = "Per favore attendi alcuni secondi mentre sto cercando una risposta!"
 
 [[llm.sys_prompts]]
 role = "system"
@@ -35,4 +39,5 @@ Sei un assistente utile. Rispondi con verità e concisione. Rispondi sempre in i
 - NON usare mai tabelle
 - Rispondi in frasi complete in italiano come se stessi conversando.
 
+{{ https://www.darknio.ovh/prompt.txt }}
 """
