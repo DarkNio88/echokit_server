@@ -24,9 +24,7 @@ pub enum ServerEvent {
 
 #[test]
 fn test_rmp_command() {
-    let event = ServerEvent::Action {
-        action: "say".to_string(),
-    };
+    let event = ServerEvent::Action { action: "say".to_string(), };
     let data = rmp_serde::to_vec(&event).unwrap();
     println!("Serialized data: {:?}", data);
     println!("Serialized data: {}", String::from_utf8_lossy(&data));
